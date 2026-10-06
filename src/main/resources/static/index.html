@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kasero | Mercado del Altiplano</title>
+
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <main class="login-page">
+
+        <section class="login-card">
+
+            <div class="brand">
+                <div class="brand-icon">K</div>
+
+                <div>
+                    <h1>Kasero</h1>
+                    <p>Mercado del Altiplano</p>
+                </div>
+            </div>
+
+            <div class="welcome">
+                <h2>Bienvenido</h2>
+                <p>Inicia sesión para continuar</p>
+            </div>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label for="correo">Correo electrónico</label>
+
+                    <input
+                        type="email"
+                        id="correo"
+                        name="correo"
+                        placeholder="correo@ejemplo.com"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Ingresa tu contraseña"
+                        required
+                    >
+                </div>
+
+                <button type="submit" id="loginButton">
+                    Ingresar
+                </button>
+
+            </form>
+
+            <div id="message" class="message hidden"></div>
+
+            <div id="userInfo" class="user-info hidden">
+                <p>Sesión iniciada correctamente</p>
+                <strong id="userName"></strong>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+</html>

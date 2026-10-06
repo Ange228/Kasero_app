@@ -1,0 +1,158 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background:
+        radial-gradient(circle at top left, #f7dce9 0%, transparent 35%),
+        radial-gradient(circle at bottom right, #ddd3f5 0%, transparent 35%),
+        #f7f3f6;
+    color: #3e3540;
+}
+
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 430px;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 20px 45px rgba(87, 63, 79, 0.15);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+}
+
+.brand-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #d982a8;
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.brand h1 {
+    font-size: 26px;
+    margin-bottom: 4px;
+}
+
+.brand p {
+    color: #8b7c88;
+    font-size: 14px;
+}
+
+.welcome {
+    margin-bottom: 28px;
+}
+
+.welcome h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.welcome p {
+    color: #8b7c88;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1px solid #ddd3da;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #d982a8;
+    box-shadow: 0 0 0 3px rgba(217, 130, 168, 0.15);
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #d982a8;
+    color: white;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #c96f99;
+}
+
+button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.message {
+    margin-top: 18px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+.message.success {
+    background: #e6f5eb;
+    color: #2e6b43;
+}
+
+.message.error {
+    background: #fce8ed;
+    color: #9d3b58;
+}
+
+.user-info {
+    margin-top: 20px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #f8f2f7;
+    text-align: center;
+}
+
+.user-info p {
+    margin-bottom: 8px;
+    color: #8b7c88;
+    font-size: 14px;
+}
+
+.hidden {
+    display: none;
+}
