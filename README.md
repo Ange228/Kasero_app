@@ -475,9 +475,3 @@ La evaluación arquitectónica cuenta con las siguientes evidencias principales:
 **Módulo implementado:** Autenticación
 
 ---
-
-## 15. Autor
-
-**Angélica Valeria Castillo Tovar**
-
-Proyecto desarrollado con fines académicos para el análisis y mejora de la calidad y arquitectura de software.
