@@ -17,18 +17,23 @@ Sistema web orientado a la digitalización y gestión de los puestos del **Merca
 
 **Kasero** es una aplicación web orientada a facilitar la interacción entre clientes y puestos del Mercado del Altiplano, proporcionando una base para la consulta de información, comunicación y futura gestión de pedidos y reservas.
 
-La implementación actual se encuentra enfocada en el **módulo de autenticación**, utilizado como base para el análisis, diagnóstico y mejora de la arquitectura de software.
+La idea central: el cliente **compara cuánto le cuesta su canasta en cada puesto** y **pide una cotización** al comerciante que más le conviene.
 
-Actualmente el sistema incluye:
+Actualmente el sistema incluye (avance del Hito 1):
 
-* **Autenticación de usuarios:** inicio de sesión mediante correo y contraseña.
-* **Interfaz web:** formulario de login desarrollado con HTML, CSS y JavaScript.
-* **API REST:** endpoint de autenticación implementado mediante Spring Boot.
+* **Cuenta de usuario:** registro e inicio de sesión (contraseñas con PBKDF2, sesión con token que vence a las 8 horas).
+* **Catálogo del mercado:** sectores, productos, comerciantes, promociones y avisos.
+* **Búsqueda y filtros:** por nombre, producto, sector o número de puesto; orden por precio, calificación o más cotizados.
+* **Perfil del puesto:** ubicación (pasillo y puesto), métodos de pago, formas de entrega y precios con su fecha.
+* **Comparador de canasta:** compara solo a quienes venden todos los productos elegidos.
+* **Cotizaciones:** crear una cotización (sin duplicados si se envía dos veces) y ver el historial.
+* **Interfaz web:** inicio, buscar, perfil, comparar, cotizar, historial e ingreso; se adapta al celular.
 * **Separación por capas:** presentación, aplicación/negocio, acceso a datos y dominio.
-* **Abstracción de persistencia:** uso de `UsuarioRepositoryPort`.
-* **Manejo centralizado de errores:** `AuthenticationException` y `GlobalExceptionHandler`.
-* **Modelo inicial de dominio:** `Usuario`, `Chat` y `Mensaje`.
+* **Abstracción de persistencia:** puertos (`...RepositoryPort`) con implementación en memoria.
+* **Manejo centralizado de errores:** `GlobalExceptionHandler`.
 * **Documentación arquitectónica:** diagramas PlantUML y ADR.
+
+> **Datos de demostración:** los comerciantes, productos y precios del catálogo son inventados para probar el sistema. Todavía no se cargan datos reales (el dataset de Datos Abiertos Perú se integrará en el Hito 2).
 
 ---
 
@@ -96,34 +101,23 @@ Kasero_project/
 │       │           └── altiplano/
 │       │               ├── MercadoApplication.java
 │       │               │
-│       │               ├── controller/
-│       │               │   └── AuthController.java
-│       │               │
-│       │               ├── dto/
-│       │               │   ├── LoginRequest.java
-│       │               │   └── LoginResponse.java
-│       │               │
-│       │               ├── exception/
-│       │               │   ├── AuthenticationException.java
-│       │               │   └── GlobalExceptionHandler.java
-│       │               │
-│       │               ├── model/
-│       │               │   ├── Usuario.java
-│       │               │   ├── Chat.java
-│       │               │   └── Mensaje.java
-│       │               │
-│       │               ├── repository/
-│       │               │   ├── UsuarioRepository.java
-│       │               │   └── UsuarioRepositoryPort.java
-│       │               │
-│       │               └── service/
-│       │                   └── AuthService.java
+│       │               ├── config/        (usuario de prueba)
+│       │               ├── controller/    (Auth, Catalogo, Comparador, Cotizacion)
+│       │               ├── dto/           (datos que entran y salen de la API)
+│       │               ├── exception/     (errores y GlobalExceptionHandler)
+│       │               ├── model/         (Usuario, Comerciante, Producto, Cotizacion...)
+│       │               ├── repository/    (puertos + implementación en memoria)
+│       │               ├── security/      (PasswordHasher)
+│       │               └── service/       (Auth, Sesion, Catalogo, Comparador, Cotizacion)
 │       │
 │       └── resources/
 │           └── static/
 │               ├── index.html
 │               ├── styles.css
-│               └── app.js
+│               ├── app.js          (rutas y menús)
+│               └── js/             (api, store, ui y una vista por pantalla)
+│
+│   └── test/java/...               (pruebas unitarias de servicios)
 │
 ├── .gitignore
 ├── pom.xml
@@ -210,38 +204,54 @@ POST /api/auth/login
   "exitoso": true,
   "mensaje": "Inicio de sesión exitoso",
   "usuarioId": 1,
-  "nombre": "Usuario Demo"
+  "nombre": "Usuario Demo",
+  "token": "..."
 }
 ```
+
+El `token` se envía después en la cabecera `Authorization: Bearer <token>` para pedir y ver cotizaciones.
+
+### Todos los endpoints
+
+| Método | Ruta | ¿Pide sesión? | Qué hace |
+| :----- | :--- | :-----------: | :------- |
+| POST | `/api/auth/registro` | No | Crea una cuenta (nombre, correo, contraseña de 8+ caracteres) |
+| POST | `/api/auth/login` | No | Inicia sesión y devuelve el token |
+| POST | `/api/auth/logout` | Sí | Cierra la sesión |
+| GET | `/api/sectores` | No | Sectores del mercado |
+| GET | `/api/productos?sector=` | No | Productos, opcionalmente de un sector |
+| GET | `/api/comerciantes?q=&sector=&orden=` | No | Busca comerciantes. `orden`: `precio_asc`, `precio_desc`, `calificacion`, `cotizaciones` |
+| GET | `/api/comerciantes/{id}` | No | Perfil del puesto con precios |
+| GET | `/api/promociones` | No | Promociones con precio ya descontado |
+| GET | `/api/noticias` | No | Avisos del mercado |
+| GET | `/api/canasta-referencia` | No | Canasta de ejemplo para comparar |
+| POST | `/api/comparaciones` | No | Compara una canasta (`items`, `orden`: `asc` o `desc`) |
+| POST | `/api/cotizaciones` | Sí | Crea una cotización (`claveSolicitud` evita duplicados) |
+| GET | `/api/cotizaciones` | Sí | Historial del usuario, la más nueva primero |
 
 ---
 
 ## 6. Interfaz Web
 
-La aplicación dispone de una interfaz web inicial para el módulo de autenticación.
+La interfaz es una página única (sin librerías externas) que cambia de pantalla con la parte `#` de la dirección:
 
-La interfaz se encuentra implementada mediante:
+| Pantalla | Dirección | Requiere ingresar |
+| :------- | :-------- | :---------------: |
+| Inicio | `#/` | No |
+| Buscar y filtrar | `#/buscar` | No |
+| Perfil del puesto | `#/comerciante/1` | No |
+| Comparar canasta | `#/comparar` | No |
+| Cotizar | `#/cotizar/1` | Sí |
+| Mis cotizaciones | `#/cotizaciones` | Sí |
+| Ingresar / registrarse | `#/acceso` | No |
 
-```text
-src/main/resources/static/
-├── index.html
-├── styles.css
-└── app.js
-```
+Cuidados de la interfaz: el texto que viene de la API nunca se inserta como HTML, funciona con teclado, tiene enlace para saltar al contenido, menú inferior en celular y mensajes claros para estados de carga, vacío y error. Los totales se muestran en una "pizarra de precios", como los precios escritos con tiza en un puesto.
 
 El frontend es servido directamente por Spring Boot y se encuentra disponible en:
 
 ```text
 http://localhost:8080
 ```
-
-El formulario de login consume el endpoint:
-
-```text
-POST /api/auth/login
-```
-
-permitiendo validar las credenciales y mostrar mensajes de éxito o error.
 
 ---
 
@@ -338,6 +348,16 @@ Al iniciar correctamente, Spring Boot levanta el servidor en:
 http://localhost:8080
 ```
 
+### Pruebas
+
+```powershell
+mvn test
+```
+
+Hay pruebas unitarias para contraseñas, sesiones, registro/login, búsqueda, comparador y cotizaciones.
+
+> Nota: mientras se escribió esto no se pudo descargar Maven Central desde el entorno de trabajo, así que las pruebas se corrieron con un arnés local propio y la aplicación se vio funcionando con un servidor de prueba. **Falta confirmar `mvn clean package` y `mvn spring-boot:run` en una máquina con internet.**
+
 ### Detener la aplicación
 
 En la terminal donde se encuentra ejecutándose:
@@ -350,7 +370,7 @@ Ctrl + C
 
 ## 9. Credenciales de Prueba
 
-La versión actual utiliza almacenamiento en memoria para fines académicos.
+La versión actual utiliza almacenamiento en memoria para fines académicos (al reiniciar se pierden las cuentas y cotizaciones nuevas). Las contraseñas se guardan con hash PBKDF2, nunca en texto plano.
 
 ```text
 Correo:
@@ -360,7 +380,7 @@ Contraseña:
 123456
 ```
 
-> Estas credenciales corresponden únicamente al usuario de prueba utilizado durante el desarrollo. La persistencia definitiva y el almacenamiento seguro de contraseñas quedan pendientes para una versión posterior.
+> Estas credenciales corresponden únicamente al usuario de prueba utilizado durante el desarrollo. También se puede crear una cuenta desde la pantalla de registro. La persistencia definitiva en base de datos queda pendiente.
 
 ---
 
@@ -432,19 +452,24 @@ GlobalExceptionHandler
 * [x] Modelo inicial de usuarios.
 * [x] Modelo inicial de chats y mensajes.
 * [x] ADR de la decisión arquitectónica.
+* [x] Registro de usuarios y hash seguro de contraseñas.
+* [x] Búsqueda, filtro por sector y orden de resultados.
+* [x] Perfil del puesto con productos y precios.
+* [x] Comparador de canasta.
+* [x] Cotización e historial de cotizaciones.
+* [x] Interfaz web completa para lo anterior.
+* [x] Pruebas unitarias de los servicios.
 
 ### Pendiente
 
-* [ ] Registro de usuarios.
-* [ ] Persistencia mediante base de datos.
-* [ ] Hash seguro de contraseñas.
+* [ ] Persistencia mediante base de datos (PostgreSQL).
+* [ ] Datos reales desde Datos Abiertos Perú.
+* [ ] Confirmación de la cotización por el comerciante.
+* [ ] Elegir y guardar la forma de entrega en el pedido.
 * [ ] Chat e historial de mensajes.
-* [ ] Cotización.
-* [ ] Reservas.
-* [ ] Búsqueda y filtros por sector.
+* [ ] Reservas y seguimiento de pedidos.
 * [ ] Calificaciones y reseñas.
-* [ ] Seguimiento de pedidos.
-* [ ] Información de puestos y productos.
+* [ ] Despliegue en la nube.
 
 ---
 
@@ -469,9 +494,9 @@ La evaluación arquitectónica cuenta con las siguientes evidencias principales:
 
 ## 14. Estado del Proyecto
 
-**Versión actual:** `v0.2`
+**Versión actual:** `v0.3` (avance del Hito 1)
 **Estado:** En desarrollo
 **Tipo:** Proyecto académico
-**Módulo implementado:** Autenticación
+**Módulos implementados:** Autenticación, catálogo y búsqueda, comparador, cotizaciones
 
 ---
