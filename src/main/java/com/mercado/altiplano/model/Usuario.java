@@ -5,16 +5,18 @@ public class Usuario {
     private Long id;
     private String nombre;
     private String correo;
-    private String password;
+
+    /** Nunca se guarda la contraseña real, solo su hash (ver PasswordHasher). */
+    private String passwordHash;
 
     public Usuario() {
     }
 
-    public Usuario(Long id, String nombre, String correo, String password) {
+    public Usuario(Long id, String nombre, String correo, String passwordHash) {
         this.id = id;
         this.nombre = nombre;
         this.correo = correo;
-        this.password = password;
+        this.passwordHash = passwordHash;
     }
 
     public Long getId() {
@@ -41,11 +43,11 @@ public class Usuario {
         this.correo = correo;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 }
