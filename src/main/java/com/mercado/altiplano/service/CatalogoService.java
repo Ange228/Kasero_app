@@ -14,6 +14,7 @@ import com.mercado.altiplano.model.Producto;
 import com.mercado.altiplano.model.Promocion;
 import com.mercado.altiplano.model.Sector;
 import com.mercado.altiplano.repository.CatalogoRepositoryPort;
+import com.mercado.altiplano.repository.CotizacionRepositoryPort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -37,10 +38,16 @@ public class CatalogoService {
 
     private final CatalogoRepositoryPort catalogo;
     private final CalculadoraCanasta calculadora;
+    private final CotizacionRepositoryPort cotizaciones;
 
-    public CatalogoService(CatalogoRepositoryPort catalogo, CalculadoraCanasta calculadora) {
+    public CatalogoService(
+            CatalogoRepositoryPort catalogo,
+            CalculadoraCanasta calculadora,
+            CotizacionRepositoryPort cotizaciones
+    ) {
         this.catalogo = catalogo;
         this.calculadora = calculadora;
+        this.cotizaciones = cotizaciones;
     }
 
     public List<Sector> sectores() {
@@ -182,8 +189,9 @@ public class CatalogoService {
 
     // ---------- apoyo ----------
 
+    /** Las que ya tenía antes más las que se hacen en la plataforma (así "más cotizados" se mueve solo). */
     private int numCotizaciones(Comerciante comerciante) {
-        return comerciante.cotizacionesBase();
+        return comerciante.cotizacionesBase() + cotizaciones.contarPorComerciante(comerciante.id());
     }
 
     private Map<Long, String> nombresDeSectores() {

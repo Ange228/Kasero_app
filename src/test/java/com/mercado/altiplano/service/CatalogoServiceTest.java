@@ -7,6 +7,7 @@ import com.mercado.altiplano.dto.PromocionDto;
 import com.mercado.altiplano.exception.RecursoNoEncontradoException;
 import com.mercado.altiplano.exception.SolicitudInvalidaException;
 import com.mercado.altiplano.repository.CatalogoRepository;
+import com.mercado.altiplano.repository.CotizacionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,10 @@ class CatalogoServiceTest {
     @BeforeEach
     void preparar() {
         CatalogoRepository repositorio = new CatalogoRepository();
-        servicio = new CatalogoService(repositorio, new CalculadoraCanasta(repositorio));
+        servicio = new CatalogoService(
+                repositorio,
+                new CalculadoraCanasta(repositorio),
+                new CotizacionRepository());
     }
 
     private static List<String> nombres(List<ComercianteResumenDto> resultados) {
